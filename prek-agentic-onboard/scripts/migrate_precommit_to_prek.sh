@@ -39,7 +39,7 @@ backup_dir="${git_dir}/hooks.backup.${ts}"
 
 mkdir -p "${backup_dir}"
 if [[ -d "${hooks_dir}" ]]; then
-  cp -a "${hooks_dir}/." "${backup_dir}/"
+  cp -pR "${hooks_dir}/." "${backup_dir}/"
 fi
 echo "Backed up hooks to: ${backup_dir}" >&2
 
