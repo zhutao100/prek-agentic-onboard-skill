@@ -1,0 +1,4 @@
+# Extra exclusions for prek workspace discovery (in addition to .gitignore)
+third_party/
+vendor/
+generated/

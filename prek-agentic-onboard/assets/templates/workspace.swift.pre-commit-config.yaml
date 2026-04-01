@@ -1,0 +1,13 @@
+# ios/.pre-commit-config.yaml (or swift/)
+orphan: true
+
+repos:
+  - repo: local
+    hooks:
+      - id: swift-format-autostage
+        name: swift-format (autostage wrapper)
+        entry: ./scripts/precommit_swift_format_autostage.sh
+        language: system
+        pass_filenames: false
+        files: \.swift$
+        require_serial: true

@@ -1,0 +1,7 @@
+display_name: prek agentic onboard
+short_description: Onboard prek, workspace mode, and auto-stage commit convergence
+default_prompt: >
+  Help me onboard or migrate this repository to prek (pre-commit replacement).
+  Prefer workspace-mode layouts for polyglot repos, and design an agent-friendly
+  workflow that converges auto-formatting and auto-staging so commits do not fail
+  due to formatter edits.
