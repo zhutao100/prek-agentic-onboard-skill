@@ -25,11 +25,11 @@ This skill follows the open Agent Skills standard: a folder containing `SKILL.md
 
 ## Typical usage
 
-When working in a target project repo:
+Run from anywhere; pass `--repo <path-to-project>` (defaults to the current directory):
 
-- Greenfield setup: run `prek-agentic-onboard/scripts/prek_bootstrap.sh`
-- Migration: run `prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh`
-- Agentic auto-stage (global shim): run `prek-agentic-onboard/scripts/setup_agentic_autostage_shim.sh`
+- Greenfield setup: run `prek-agentic-onboard/scripts/prek_bootstrap.sh --repo <path> --install-prek --config portable`
+- Migration: run `prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh --repo <path>`
+- Agentic auto-stage (global shim): run `prek-agentic-onboard/scripts/setup_agentic_autostage_shim.sh --repo <path>`
 - Per-language auto-stage wrappers: copy from `prek-agentic-onboard/scripts/hooks/` and wire via `repo: local` hooks
 
 See `prek-agentic-onboard/references/` for the playbook and templates.

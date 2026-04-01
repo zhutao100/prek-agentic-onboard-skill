@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+skill_dir="$(cd -- "${script_dir}/.." && pwd)"
+templates_dir="${skill_dir}/assets/templates"
+
 repo="."
 max_rounds="${PREK_AUTOFIX_MAX_ROUNDS:-5}"
 
@@ -36,7 +40,7 @@ fi
 cd "$repo_root"
 
 mkdir -p .githooks
-cp "prek-agentic-onboard/assets/templates/githooks.pre-commit.self-heal.sh" .githooks/pre-commit
+cp "${templates_dir}/githooks.pre-commit.self-heal.sh" .githooks/pre-commit
 chmod +x .githooks/pre-commit
 
 # Bake max rounds into hook via env var in hook execution context:

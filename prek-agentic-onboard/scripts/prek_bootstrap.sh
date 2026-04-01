@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+skill_dir="$(cd -- "${script_dir}/.." && pwd)"
+templates_dir="${skill_dir}/assets/templates"
+
 usage() {
   cat >&2 <<'USAGE'
 Usage:
@@ -78,10 +82,10 @@ install_baseline_config_if_missing() {
 
   case "$config" in
     portable)
-      cp "prek-agentic-onboard/assets/templates/pre-commit-config.portable.yaml" ".pre-commit-config.yaml"
+      cp "${templates_dir}/pre-commit-config.portable.yaml" ".pre-commit-config.yaml"
       ;;
     builtin)
-      cp "prek-agentic-onboard/assets/templates/pre-commit-config.builtin.yaml" ".pre-commit-config.yaml"
+      cp "${templates_dir}/pre-commit-config.builtin.yaml" ".pre-commit-config.yaml"
       ;;
     *)
       echo "error: unknown --config: $config (expected portable|builtin)" >&2

@@ -41,12 +41,14 @@ Use this skill when you need to:
 
 ## Step-by-step procedures
 
+All scripts support `--repo <path>` (default: current working directory) and locate templates relative to the script, so you do **not** need to copy this skill folder into the target repo.
+
 ### A) Greenfield bootstrap (portable YAML baseline)
 
 Run:
 
 ```bash
-bash prek-agentic-onboard/scripts/prek_bootstrap.sh --install-prek --config portable
+bash prek-agentic-onboard/scripts/prek_bootstrap.sh --repo <path-to-repo> --install-prek --config portable
 ```
 
 This will:
@@ -61,7 +63,7 @@ This will:
 Run:
 
 ```bash
-bash prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh
+bash prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh --repo <path-to-repo>
 ```
 
 This will back up `.git/hooks/`, run `pre-commit uninstall` if present, then install prek shims (or run `prek prepare-hooks` if `core.hooksPath` is set).
@@ -71,7 +73,7 @@ This will back up `.git/hooks/`, run `pre-commit uninstall` if present, then ins
 Run:
 
 ```bash
-bash prek-agentic-onboard/scripts/setup_agentic_autostage_shim.sh
+bash prek-agentic-onboard/scripts/setup_agentic_autostage_shim.sh --repo <path-to-repo>
 ```
 
 This will:
