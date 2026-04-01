@@ -1,6 +1,4 @@
 # frontend/.pre-commit-config.yaml
-orphan: true
-
 repos:
   - repo: local
     hooks:

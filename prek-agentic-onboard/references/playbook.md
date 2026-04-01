@@ -46,16 +46,26 @@ Lowest risk migration:
 
 Use `scripts/migrate_precommit_to_prek.sh`.
 
+Follow-up (what agents commonly miss):
+
+- **Review the existing `.pre-commit-config.yaml`** for language coverage and hook intent.
+  - For polyglot repos, ensure Rust/Python/JS/Shell/etc have *both* formatting and checks as appropriate.
+- If the repo is a **polyglot monorepo**, consider moving to **workspace mode** (thin root + per-subproject configs).
+  - Safe scaffold: `scripts/scaffold_workspace_mode.sh` (creates missing subproject configs without rewriting existing ones).
+  - Then run `prek list` to confirm multiple projects are discovered and `prek run --all-files` to validate end-to-end.
+
 ## 3) Workspace mode (polyglot repos)
 
 Recommended layout (“thin root, thick leaves”):
 
 - Root `.pre-commit-config.yaml`: only repo-wide hygiene and security checks
-- Subprojects: each has its own `.pre-commit-config.yaml` with `orphan: true`
+- Subprojects: each has its own `.pre-commit-config.yaml` for language-local toolchains/lockfiles
+  - Omit `orphan: true` by default so root hygiene hooks still apply inside subprojects.
 
 Templates:
 
 - `assets/templates/workspace.*.pre-commit-config.yaml`
+- `assets/templates/workspace.bash.pre-commit-config.yaml`
 - `assets/templates/prekignore`
 
 Run patterns:

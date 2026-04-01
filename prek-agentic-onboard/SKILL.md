@@ -68,6 +68,14 @@ bash prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh --repo <path-to-r
 
 This will back up `.git/hooks/`, run `pre-commit uninstall` if present, then install prek shims (or run `prek prepare-hooks` if `core.hooksPath` is set).
 
+Then (recommended):
+
+- Review the existing `.pre-commit-config.yaml` and ensure **all major languages** in the repo have appropriate hooks (format + checks).
+- If the repo is polyglot, switch to **workspace mode** (thin root + per-subproject configs) and verify:
+  - scaffold missing subproject configs: `bash prek-agentic-onboard/scripts/scaffold_workspace_mode.sh --repo <path-to-repo>`
+  - confirm discovery: `prek list`
+  - end-to-end run: `prek run --all-files`
+
 ### C) Enable agent-friendly commit convergence (Strategy A)
 
 Run:

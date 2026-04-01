@@ -12,7 +12,8 @@ Workspace mode is the prek feature that allows multiple `.pre-commit-config.yaml
 
 - Root config: cross-cutting checks only.
 - Per-subproject configs: language-local hooks that rely on local toolchains and lockfiles.
-- Use `orphan: true` to prevent duplicated processing from parent configs.
+- Omit `orphan: true` by default so root cross-cutting hooks still run in subprojects.
+- Use `orphan: true` only when you intentionally want to detach a subproject from parent configs (e.g. you duplicate root hooks inside the subproject, or parent hooks are incompatible/too slow for that subtree).
 
 ## Discovery exclusions
 

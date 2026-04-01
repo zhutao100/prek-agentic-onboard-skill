@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 repo="."
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -72,4 +74,12 @@ Migration complete.
 Rollback options:
 - Restore hooks from: ${backup_dir}
 - Re-run: pre-commit install (if you want to go back)
+
+Next steps (recommended):
+- Review your existing config(s) for coverage across languages and hook intent.
+- If this is a polyglot repo, consider prek workspace mode (thin root + per-subproject configs):
+  bash "${script_dir}/scaffold_workspace_mode.sh" --repo "${repo_root}"
+- Verify discovery and end-to-end:
+  prek list
+  prek run --all-files
 EOF

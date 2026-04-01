@@ -29,6 +29,7 @@ Run from anywhere; pass `--repo <path-to-project>` (defaults to the current dire
 
 - Greenfield setup: run `prek-agentic-onboard/scripts/prek_bootstrap.sh --repo <path> --install-prek --config portable`
 - Migration: run `prek-agentic-onboard/scripts/migrate_precommit_to_prek.sh --repo <path>`
+- Workspace mode scaffold: run `prek-agentic-onboard/scripts/scaffold_workspace_mode.sh --repo <path>`
 - Agentic auto-stage (global shim): run `prek-agentic-onboard/scripts/setup_agentic_autostage_shim.sh --repo <path>`
 - Per-language auto-stage wrappers: copy from `prek-agentic-onboard/scripts/hooks/` and wire via `repo: local` hooks
 

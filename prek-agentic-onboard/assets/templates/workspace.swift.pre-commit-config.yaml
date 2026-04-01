@@ -1,6 +1,4 @@
 # ios/.pre-commit-config.yaml (or swift/)
-orphan: true
-
 repos:
   - repo: local
     hooks:
