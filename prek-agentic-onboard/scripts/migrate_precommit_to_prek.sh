@@ -31,8 +31,9 @@ if [[ "${#config_files[@]}" -eq 0 ]]; then
 fi
 
 ts="$(date +%Y%m%d-%H%M%S)"
+git_dir="$(git rev-parse --git-dir)"
 hooks_dir="$(git rev-parse --git-path hooks)"
-backup_dir="${hooks_dir}.backup.${ts}"
+backup_dir="${git_dir}/hooks.backup.${ts}"
 
 mkdir -p "${backup_dir}"
 if [[ -d "${hooks_dir}" ]]; then
