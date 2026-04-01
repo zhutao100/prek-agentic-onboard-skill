@@ -1,24 +1,85 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "swift-format-autostage PID=$$ args=$*" >&2
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
-# --- tool discovery ---
-# Prefer an installed swift-format in PATH, otherwise use Xcode toolchain.
-if command -v swift-format >/dev/null 2>&1; then
-  SWIFT_FORMAT=(swift-format)
-elif command -v xcrun >/dev/null 2>&1; then
-  SWIFT_FORMAT_PATH="$(xcrun --find swift-format 2>/dev/null || true)"
-  if [[ -n "${SWIFT_FORMAT_PATH}" ]]; then
-    SWIFT_FORMAT=("${SWIFT_FORMAT_PATH}")
-  else
-    echo "error: swift-format not found (neither in PATH nor via xcrun). Install swift-format." >&2
-    exit 2
-  fi
-else
-  echo "error: swift-format not found (no swift-format in PATH, and xcrun unavailable)." >&2
-  exit 2
+swiftformat_config=""
+if [[ -f "${repo_root}/.swiftformat" ]]; then
+  swiftformat_config="${repo_root}/.swiftformat"
+elif [[ -f "${repo_root}/.swiftformat.json" ]]; then
+  swiftformat_config="${repo_root}/.swiftformat.json"
 fi
+
+swift_format_config=""
+for p in \
+  "${repo_root}/.swift-format" \
+  "${repo_root}/.swift-format.json" \
+  "${repo_root}/swift-format.json" \
+  "${repo_root}/.swift-format.yml" \
+  "${repo_root}/.swift-format.yaml"
+do
+  if [[ -f "${p}" ]]; then
+    swift_format_config="${p}"
+    break
+  fi
+done
+
+tool_hint="$(printf '%s' "${SWIFT_FORMATTER_TOOL:-}" | tr '[:upper:]' '[:lower:]')"
+if [[ -z "${tool_hint}" ]]; then
+  if [[ -n "${swiftformat_config}" && -z "${swift_format_config}" ]]; then
+    tool_hint="swiftformat"
+  elif [[ -n "${swift_format_config}" && -z "${swiftformat_config}" ]]; then
+    tool_hint="swift-format"
+  elif [[ -n "${swift_format_config}" && -n "${swiftformat_config}" ]]; then
+    echo "error: both swiftformat and swift-format config files detected; set SWIFT_FORMATTER_TOOL=swiftformat|swift-format." >&2
+    exit 2
+  elif command -v swiftformat >/dev/null 2>&1; then
+    # Prefer SwiftFormat (Nick Lockwood) when installed; swift-format is often present via Xcode toolchains.
+    tool_hint="swiftformat"
+  else
+    tool_hint="swift-format"
+  fi
+fi
+
+tool_kind=""
+declare -a tool=()
+declare -a tool_config_args=()
+
+case "${tool_hint}" in
+  swiftformat)
+    if ! command -v swiftformat >/dev/null 2>&1; then
+      echo "error: swiftformat not found in PATH. Install SwiftFormat (e.g. 'brew install swiftformat')." >&2
+      exit 2
+    fi
+    tool_kind="swiftformat"
+    tool=(swiftformat)
+    [[ -n "${swiftformat_config}" ]] && tool_config_args+=(--config "${swiftformat_config}")
+    ;;
+  swift-format|swift_format)
+    tool_kind="swift-format"
+    if command -v swift-format >/dev/null 2>&1; then
+      tool=(swift-format)
+    elif command -v xcrun >/dev/null 2>&1; then
+      swift_format_path="$(xcrun --find swift-format 2>/dev/null || true)"
+      if [[ -n "${swift_format_path}" ]]; then
+        tool=("${swift_format_path}")
+      else
+        echo "error: swift-format not found (neither in PATH nor via xcrun). Install swift-format." >&2
+        exit 2
+      fi
+    else
+      echo "error: swift-format not found (no swift-format in PATH, and xcrun unavailable)." >&2
+      exit 2
+    fi
+    [[ -n "${swift_format_config}" ]] && tool_config_args+=(--configuration "${swift_format_config}")
+    ;;
+  *)
+    echo "error: invalid SWIFT_FORMATTER_TOOL=${SWIFT_FORMATTER_TOOL:-} (expected: swiftformat|swift-format)." >&2
+    exit 2
+    ;;
+esac
+
+echo "swift-format-autostage tool=${tool_kind} PID=$$ args=$*" >&2
 
 # --- file collection helpers (NUL-delimited for safety) ---
 collect_staged_swift_files() {
@@ -50,11 +111,8 @@ if [[ "${#files[@]}" -eq 0 ]]; then
 fi
 
 # --- formatting ---
-# Optional: set SWIFTFORMAT_IGNORE_UNPARSABLE=1 to avoid blocking on WIP syntax breaks.
-format_args=(format --in-place --parallel)
-if [[ "${SWIFTFORMAT_IGNORE_UNPARSABLE:-0}" == "1" ]]; then
-  format_args+=(--ignore-unparsable-files)
-fi
+autostage="${SWIFT_FORMAT_AUTOSTAGE:-${SWIFTFORMAT_AUTOSTAGE:-1}}"
+ignore_unparsable="${SWIFT_FORMAT_IGNORE_UNPARSABLE:-${SWIFTFORMAT_IGNORE_UNPARSABLE:-0}}"
 
 # Chunk to avoid argv limits on very large repos.
 run_in_chunks() {
@@ -67,12 +125,22 @@ run_in_chunks() {
   done
 }
 
-run_in_chunks "${SWIFT_FORMAT[@]}" "${format_args[@]}"
+if [[ "${tool_kind}" == "swiftformat" ]]; then
+  run_in_chunks "${tool[@]}" "${tool_config_args[@]}"
+else
+  # Optional: set SWIFT_FORMAT_IGNORE_UNPARSABLE=1 (or SWIFTFORMAT_IGNORE_UNPARSABLE=1) to avoid blocking on WIP syntax breaks.
+  format_args=(format --in-place --parallel)
+  format_args+=("${tool_config_args[@]}")
+  if [[ "${ignore_unparsable}" == "1" ]]; then
+    format_args+=(--ignore-unparsable-files)
+  fi
+  run_in_chunks "${tool[@]}" "${format_args[@]}"
+fi
 
 # --- autostage (safe) ---
 # Hooks that modify files require re-staging; do it here and avoid index lock contention.
 git_dir="$(git rev-parse --git-dir)"
-lock_dir="${git_dir}/.swift-format-precommit.lockdir"
+lock_dir="${git_dir}/.swift-formatter-precommit.lockdir"
 
 acquire_lock() {
   local attempts=0
@@ -111,15 +179,19 @@ git_add_with_retry() {
 }
 
 # Optional: set SWIFTFORMAT_AUTOSTAGE=0 to disable staging (useful in CI/manual runs).
-if [[ "${SWIFTFORMAT_AUTOSTAGE:-1}" == "1" ]]; then
+if [[ "${autostage}" == "1" ]]; then
   acquire_lock
   git_add_with_retry
 fi
 
 # --- lint (strict gate) ---
-lint_args=(lint --strict --parallel)
-if [[ "${SWIFTFORMAT_IGNORE_UNPARSABLE:-0}" == "1" ]]; then
-  lint_args+=(--ignore-unparsable-files)
+if [[ "${tool_kind}" == "swiftformat" ]]; then
+  run_in_chunks "${tool[@]}" --lint "${tool_config_args[@]}"
+else
+  lint_args=(lint --strict --parallel)
+  lint_args+=("${tool_config_args[@]}")
+  if [[ "${ignore_unparsable}" == "1" ]]; then
+    lint_args+=(--ignore-unparsable-files)
+  fi
+  run_in_chunks "${tool[@]}" "${lint_args[@]}"
 fi
-
-run_in_chunks "${SWIFT_FORMAT[@]}" "${lint_args[@]}"

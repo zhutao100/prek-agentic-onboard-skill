@@ -2,7 +2,7 @@
 name: prek-agentic-onboard
 description: Onboard or migrate repositories from pre-commit to prek, including workspace-mode polyglot setup and agent-friendly auto-format+auto-stage commit convergence (global shim or per-language wrapper hooks).
 license: MIT
-compatibility: Designed for Codex CLI and other Agent Skills clients. Requires git and a POSIX shell; optional tools per language (ruff, pnpm, cargo, shfmt, swift-format). Internet access recommended for installing/updating hooks.
+compatibility: Designed for Codex CLI and other Agent Skills clients. Requires git and a POSIX shell; optional tools per language (ruff, pnpm, cargo, shfmt, swiftformat/swift-format). Internet access recommended for installing/updating hooks.
 metadata:
   version: "1.0"
   updated: "2026-04-01"

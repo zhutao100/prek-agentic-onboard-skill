@@ -1,9 +1,10 @@
 # ios/.pre-commit-config.yaml (or swift/)
+# `precommit_swift_format_autostage.sh` auto-detects SwiftFormat (`swiftformat`) vs Swift's `swift-format`.
 repos:
   - repo: local
     hooks:
       - id: swift-format-autostage
-        name: swift-format (autostage wrapper)
+        name: swift-format / swiftformat (autostage wrapper)
         entry: ./scripts/precommit_swift_format_autostage.sh
         language: system
         pass_filenames: false
