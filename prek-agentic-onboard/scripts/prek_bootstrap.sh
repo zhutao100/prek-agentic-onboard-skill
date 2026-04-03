@@ -125,4 +125,38 @@ if [[ "$run_all" == "true" ]]; then
   prek run --all-files --show-diff-on-failure
 fi
 
+maybe_prompt_workspace_mode() {
+  # Best-effort polyglot detection to nudge agents toward workspace mode.
+  local -a langs=()
+  git ls-files -- '*.swift' 2>/dev/null | grep -q . && langs+=("Swift")
+  git ls-files -- '*.ts' '*.tsx' '*.mts' '*.cts' 2>/dev/null | grep -q . && langs+=("TypeScript")
+  git ls-files -- '*.js' '*.jsx' '*.mjs' '*.cjs' 2>/dev/null | grep -q . && langs+=("JavaScript")
+  git ls-files -- '*.py' '*.pyi' 2>/dev/null | grep -q . && langs+=("Python")
+  git ls-files -- '*.rs' 2>/dev/null | grep -q . && langs+=("Rust")
+
+  if [[ "${#langs[@]}" -lt 2 ]]; then
+    return 0
+  fi
+
+  # Only prompt if there are no nested configs yet.
+  if find . -path './.git' -prune -o \
+      \( -mindepth 2 \( -name '.pre-commit-config.yaml' -o -name '.pre-commit-config.yml' -o -name 'prek.toml' \) \) \
+      -print -quit 2>/dev/null | grep -q .; then
+    return 0
+  fi
+
+  cat >&2 <<EOF
+note: detected a likely polyglot repo (${langs[*]}).
+
+Consider enabling prek workspace mode (thin root + per-subproject configs):
+  bash "${script_dir}/scaffold_workspace_mode.sh" --repo "${repo_root}"
+
+After adding nested configs, use \`--refresh\` to re-discover projects:
+  prek --refresh list
+  prek --refresh run --all-files
+EOF
+}
+
+maybe_prompt_workspace_mode || true
+
 echo "Done." >&2

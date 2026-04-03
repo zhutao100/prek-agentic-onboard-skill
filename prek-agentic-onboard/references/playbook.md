@@ -52,7 +52,7 @@ Follow-up (what agents commonly miss):
   - For polyglot repos, ensure Rust/Python/JS/Shell/etc have *both* formatting and checks as appropriate.
 - If the repo is a **polyglot monorepo**, consider moving to **workspace mode** (thin root + per-subproject configs).
   - Safe scaffold: `scripts/scaffold_workspace_mode.sh` (creates missing subproject configs without rewriting existing ones).
-  - Then run `prek list` to confirm multiple projects are discovered and `prek run --all-files` to validate end-to-end.
+  - Then run `prek --refresh list` to confirm multiple projects are discovered and `prek run --all-files` to validate end-to-end.
 
 ## 3) Workspace mode (polyglot repos)
 
@@ -67,6 +67,7 @@ Templates:
 - `assets/templates/workspace.*.pre-commit-config.yaml`
 - `assets/templates/workspace.bash.pre-commit-config.yaml`
 - `assets/templates/prekignore`
+- For JS/TS formatting, prefer lockfile-driven Prettier (or `npm exec prettier@...`) rather than `pre-commit/mirrors-prettier`, which can lag behind upstream.
 
 Run patterns:
 
@@ -75,6 +76,8 @@ prek run                 # from workspace root
 prek run -C frontend     # focus one subtree
 prek run --directory frontend
 ```
+
+Tip: workspace discovery is cached; after adding/removing nested configs, use `--refresh` (for example `prek --refresh list`).
 
 ## 4) Agentic commit convergence
 

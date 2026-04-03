@@ -1,0 +1,13 @@
+# typescript/.pre-commit-config.yaml (or schema/typescript/)
+#
+# Prefer invoking Prettier from your lockfile (pnpm/npm/yarn) so versions are pinned.
+# This template uses `npm exec` + a pinned version as a portable fallback.
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (write via npm)
+        language: system
+        entry: npm exec --yes prettier@3.8.1 -- --write
+        files: \.tsx?$
+        require_serial: true

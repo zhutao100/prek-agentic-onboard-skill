@@ -33,11 +33,16 @@ if [[ -z "${tool_hint}" ]]; then
   elif [[ -n "${swift_format_config}" && -n "${swiftformat_config}" ]]; then
     echo "error: both swiftformat and swift-format config files detected; set SWIFT_FORMATTER_TOOL=swiftformat|swift-format." >&2
     exit 2
+  elif command -v swift-format >/dev/null 2>&1; then
+    # Prefer first-party `swift-format` for modern Swift codebases when there is no legacy config.
+    tool_hint="swift-format"
+  elif command -v xcrun >/dev/null 2>&1 && xcrun --find swift-format >/dev/null 2>&1; then
+    tool_hint="swift-format"
   elif command -v swiftformat >/dev/null 2>&1; then
-    # Prefer SwiftFormat (Nick Lockwood) when installed; swift-format is often present via Xcode toolchains.
     tool_hint="swiftformat"
   else
-    tool_hint="swift-format"
+    echo "error: no Swift formatter found. Install `swift-format` (preferred) or `swiftformat`, or set SWIFT_FORMATTER_TOOL=swiftformat|swift-format." >&2
+    exit 2
   fi
 fi
 

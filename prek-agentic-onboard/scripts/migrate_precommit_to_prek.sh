@@ -80,6 +80,6 @@ Next steps (recommended):
 - If this is a polyglot repo, consider prek workspace mode (thin root + per-subproject configs):
   bash "${script_dir}/scaffold_workspace_mode.sh" --repo "${repo_root}"
 - Verify discovery and end-to-end:
-  prek list
+  prek --refresh list
   prek run --all-files
 EOF

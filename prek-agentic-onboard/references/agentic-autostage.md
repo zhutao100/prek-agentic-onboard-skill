@@ -26,9 +26,9 @@ Use `scripts/setup_agentic_autostage_shim.sh`.
 
 Wrappers provided:
 
-- Swift: `precommit_swift_format_autostage.sh` (auto-detects `swiftformat` vs `swift-format`)
+- Swift: `precommit_swift_format_autostage.sh` (prefers first-party `swift-format`; can use `swiftformat`)
 - Python: `ruff_autostage.sh`
-- JS/TS: `prettier_autostage_pnpm.sh`
+- JS/TS: `prettier_autostage_pnpm.sh` (lockfile-driven; avoids stale mirror repos)
 - Rust: `rustfmt_autostage.sh`
 - Shell: `shfmt_autostage.sh`
 
@@ -38,6 +38,7 @@ Wrappers provided:
 
 Notes:
 
+- Default selection prefers first-party `swift-format` unless a legacy `.swiftformat*` config is detected.
 - Override auto-detection: `SWIFT_FORMATTER_TOOL=swiftformat|swift-format`
 
 ```yaml

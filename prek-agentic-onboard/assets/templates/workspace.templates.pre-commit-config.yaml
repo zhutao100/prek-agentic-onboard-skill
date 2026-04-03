@@ -1,0 +1,24 @@
+# templates/.pre-commit-config.yaml
+#
+# Common pattern: a `templates/` subtree contains example code in multiple languages.
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (write via npm)
+        language: system
+        entry: npm exec --yes prettier@3.8.1 -- --write
+        files: \.(mjs|cjs|js|jsx|ts|tsx)$
+        require_serial: true
+      - id: swift-format
+        name: swift-format (format)
+        language: system
+        entry: swift-format format --in-place --parallel
+        files: \.swift$
+        require_serial: true
+      - id: swift-format-lint
+        name: swift-format (lint --strict)
+        language: system
+        entry: swift-format lint --strict --parallel
+        files: \.swift$
+        require_serial: true

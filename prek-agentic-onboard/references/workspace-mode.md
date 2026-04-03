@@ -19,7 +19,7 @@ Workspace mode is the prek feature that allows multiple `.pre-commit-config.yaml
 
 - `.gitignore` is honored.
 - `.prekignore` adds additional workspace discovery exclusions.
-- After modifying ignore rules, use `--refresh`.
+- Workspace discovery is cached. After adding/removing nested config files (or modifying ignore rules), use `--refresh`.
 
 ## Targeted runs
 

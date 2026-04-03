@@ -2,9 +2,9 @@
 name: prek-agentic-onboard
 description: Onboard or migrate repositories from pre-commit to prek, including workspace-mode polyglot setup and agent-friendly auto-format+auto-stage commit convergence (global shim or per-language wrapper hooks).
 license: MIT
-compatibility: Designed for Codex CLI and other Agent Skills clients. Requires git and a POSIX shell; optional tools per language (ruff, pnpm, cargo, shfmt, swiftformat/swift-format). Internet access recommended for installing/updating hooks.
+compatibility: Designed for Codex CLI and other Agent Skills clients. Requires git and a POSIX shell; optional tools per language (ruff, pnpm, npm, cargo, shfmt, swift-format (preferred) / swiftformat). Internet access recommended for installing/updating hooks.
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
   updated: "2026-04-03"
 ---
 
@@ -29,7 +29,8 @@ Use this skill when you need to:
 
 2. **Single-config** vs **Workspace mode**
    - Single-config: one root `.pre-commit-config.yaml` with path scoping.
-   - Workspace mode: multiple `.pre-commit-config.yaml` files per subproject. Preferred for monorepos.
+   - Workspace mode: multiple `.pre-commit-config.yaml` files per subproject. Preferred default for polyglot repos (Swift/TS/etc), not just monorepos.
+     - Note: workspace discovery is cached; use `--refresh` after adding/removing nested configs.
 
 3. **Agentic auto-stage strategy**
    - **Strategy A (recommended): global self-healing `pre-commit` shim**
@@ -73,8 +74,8 @@ Then (recommended):
 - Review the existing `.pre-commit-config.yaml` and ensure **all major languages** in the repo have appropriate hooks (format + checks).
 - If the repo is polyglot, switch to **workspace mode** (thin root + per-subproject configs) and verify:
   - scaffold missing subproject configs: `bash prek-agentic-onboard/scripts/scaffold_workspace_mode.sh --repo <path-to-repo>`
-  - confirm discovery: `prek list`
-  - end-to-end run: `prek run --all-files`
+  - confirm discovery: `prek --refresh list`
+  - end-to-end run: `prek run --all-files` (re-run until stable if formatters modified files)
 
 ### C) Enable agent-friendly commit convergence (Strategy A)
 

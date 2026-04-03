@@ -11,12 +11,15 @@ Usage:
   scaffold_workspace_mode.sh [--repo <path>] [--force] [--no-prekignore]
 
 What it does (safe by default):
-- Creates missing subproject configs for workspace mode (without rewriting existing ones):
+- Creates missing subproject configs for workspace mode (without rewriting existing ones).
+  It only scaffolds a config when the directory exists *and* appears to contain relevant files:
   - python/.pre-commit-config.yaml
   - rust/.pre-commit-config.yaml
   - bash/.pre-commit-config.yaml
   - frontend/.pre-commit-config.yaml
   - ios/.pre-commit-config.yaml or swift/.pre-commit-config.yaml
+  - templates/.pre-commit-config.yaml
+  - schema/typescript/.pre-commit-config.yaml
 - Optionally creates a baseline `.prekignore` at the repo root.
 
 Notes:
@@ -91,15 +94,48 @@ scaffold_dir() {
   created_configs+=("${d}/.pre-commit-config.yaml")
 }
 
-scaffold_dir "python" "workspace.python.pre-commit-config.yaml"
-scaffold_dir "rust" "workspace.rust.pre-commit-config.yaml"
-scaffold_dir "bash" "workspace.bash.pre-commit-config.yaml"
-scaffold_dir "frontend" "workspace.frontend.pre-commit-config.yaml"
+dir_has_any() {
+  local d="$1"
+  shift
+  find "${d}" -type f \( "$@" \) -print -quit 2>/dev/null | grep -q .
+}
+
+if dir_has_any "python" -name '*.py' -o -name '*.pyi'; then
+  scaffold_dir "python" "workspace.python.pre-commit-config.yaml"
+fi
+
+if [[ -f "rust/Cargo.toml" ]] || dir_has_any "rust" -name '*.rs'; then
+  scaffold_dir "rust" "workspace.rust.pre-commit-config.yaml"
+fi
+
+if dir_has_any "bash" -name '*.sh' -o -name '*.bash'; then
+  scaffold_dir "bash" "workspace.bash.pre-commit-config.yaml"
+fi
+
+if [[ -f "frontend/package.json" ]]; then
+  scaffold_dir "frontend" "workspace.frontend.pre-commit-config.yaml"
+fi
 
 if [[ -d "ios" ]]; then
-  scaffold_dir "ios" "workspace.swift.pre-commit-config.yaml"
+  if dir_has_any "ios" -name '*.swift'; then
+    scaffold_dir "ios" "workspace.swift.pre-commit-config.yaml"
+  fi
 elif [[ -d "swift" ]]; then
-  scaffold_dir "swift" "workspace.swift.pre-commit-config.yaml"
+  if dir_has_any "swift" -name '*.swift'; then
+    scaffold_dir "swift" "workspace.swift.pre-commit-config.yaml"
+  fi
+fi
+
+if [[ -d "templates" ]]; then
+  if dir_has_any "templates" -name '*.swift' -o -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.mjs' -o -name '*.cjs'; then
+    scaffold_dir "templates" "workspace.templates.pre-commit-config.yaml"
+  fi
+fi
+
+if [[ -d "schema/typescript" ]]; then
+  if dir_has_any "schema/typescript" -name '*.ts' -o -name '*.tsx'; then
+    scaffold_dir "schema/typescript" "workspace.typescript.pre-commit-config.yaml"
+  fi
 fi
 
 if command -v prek >/dev/null 2>&1; then
@@ -117,4 +153,4 @@ else
   echo "note: prek not found in PATH; skipping config validation." >&2
 fi
 
-echo "Done. Next: run 'prek list' and 'prek run --all-files'." >&2
+echo "Done. Next: run 'prek --refresh list' and 'prek run --all-files'." >&2
