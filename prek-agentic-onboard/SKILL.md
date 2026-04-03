@@ -36,6 +36,7 @@ Use this skill when you need to:
    - **Strategy A (recommended): global self-healing `pre-commit` shim**
      - A Git hook script loops `prek run` + `git add` until stable (or max rounds).
      - Pros: works for *any* mutating hooks (EOF fixers, formatters, etc.).
+     - Note: once `core.hooksPath` is set, `prek install` refuses to install hooks; use `prek prepare-hooks`.
    - **Strategy B: per-language wrapper hooks**
      - Each formatter wrapper formats staged files, stages them, then runs a strict gate.
      - Pros: portable to pre-commit too, but requires more wrappers.

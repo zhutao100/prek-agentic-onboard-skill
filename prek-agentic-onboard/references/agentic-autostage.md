@@ -18,9 +18,16 @@ At time of writing (2026-04), prek does not provide a built-in “auto-stage and
 
 Use `scripts/setup_agentic_autostage_shim.sh`.
 
+Note: once `core.hooksPath` is set, `prek install` refuses to install hooks; use `prek prepare-hooks` to warm environments.
+
 ### Tuning
 
 - `PREK_AUTOFIX_MAX_ROUNDS` controls convergence attempts.
+
+### Safety (important)
+
+- Auto-staging uses `git add` on the initially-staged file list, which stages **whole files**.
+  Avoid partial staging (`git add -p`) and avoid leaving unstaged edits in files you are committing.
 
 ## Strategy B: per-language wrappers
 

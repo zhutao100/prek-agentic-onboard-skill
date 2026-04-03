@@ -25,6 +25,8 @@ prek install --prepare-hooks
 prek run --all-files --show-diff-on-failure
 ```
 
+Note: if you set `core.hooksPath` (Strategy A), `prek install` refuses to install hooks; use `prek prepare-hooks` instead.
+
 If there is no config file yet, create one:
 
 - Portable: copy `assets/templates/pre-commit-config.portable.yaml` → `.pre-commit-config.yaml`

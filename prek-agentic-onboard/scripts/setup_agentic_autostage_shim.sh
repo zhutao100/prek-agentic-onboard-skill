@@ -22,8 +22,8 @@ What it does:
 - Sets git config core.hooksPath .githooks so `git commit` uses it.
 
 Notes:
-- If you run `prek install` afterwards, it installs to .git/hooks/, not core.hooksPath.
-  Prefer: `prek prepare-hooks` and let the shim call `prek run`.
+- After setting `core.hooksPath`, `prek install` refuses to install hooks (as of `prek 0.3.x`).
+  Use `prek prepare-hooks` to warm environments; this shim calls `prek run` on commit.
 USAGE
       exit 0
       ;;

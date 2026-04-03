@@ -15,8 +15,8 @@ Defaults:
   --config        portable
 
 Notes:
-- If `git config core.hooksPath` is set, `prek install` may refuse or install to an unexpected location.
-  This script will detect hooksPath and fall back to `prek prepare-hooks` in that case.
+- If `git config core.hooksPath` is set, `prek install` refuses to install hooks (as of `prek 0.3.x`).
+  This script detects hooksPath and uses `prek prepare-hooks` instead.
 USAGE
 }
 
