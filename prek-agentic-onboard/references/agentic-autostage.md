@@ -118,3 +118,15 @@ repos:
 
 - Keep mutators first.
 - Avoid running multiple mutators concurrently (distinct priorities, or `require_serial`).
+
+## Quick verify (Strategy A)
+
+After installing the self-healing shim, confirm Git is actually using it:
+
+```bash
+git config --get core.hooksPath   # expect: .githooks
+test -x .githooks/pre-commit
+```
+
+If `core.hooksPath` is empty (or points elsewhere), `git commit` is likely still using `.git/hooks/pre-commit`
+(for example a prek-generated shim), and mutating hooks will stop the commit with “files were modified by this hook”.

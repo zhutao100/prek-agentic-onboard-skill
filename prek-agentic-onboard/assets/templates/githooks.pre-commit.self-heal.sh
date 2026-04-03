@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Allow `scripts/setup_agentic_autostage_shim.sh` to tune convergence by writing
-# `.githooks/.prek-autostage-env`.
+# Optional tuning for convergence via `.githooks/.prek-autostage-env`:
+# - `PREK_AUTOFIX_MAX_ROUNDS` controls convergence attempts.
 # shellcheck disable=SC1091
 [[ -f "$(dirname "$0")/.prek-autostage-env" ]] && source "$(dirname "$0")/.prek-autostage-env"
 

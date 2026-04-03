@@ -4,8 +4,8 @@ description: Onboard or migrate repositories from pre-commit to prek, including 
 license: MIT
 compatibility: Designed for Codex CLI and other Agent Skills clients. Requires git and a POSIX shell; optional tools per language (ruff, pnpm, cargo, shfmt, swiftformat/swift-format). Internet access recommended for installing/updating hooks.
 metadata:
-  version: "1.0"
-  updated: "2026-04-01"
+  version: "1.0.1"
+  updated: "2026-04-03"
 ---
 
 # prek agentic onboard

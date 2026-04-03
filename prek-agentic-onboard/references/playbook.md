@@ -85,6 +85,13 @@ prek run --directory frontend
 
 Use `scripts/setup_agentic_autostage_shim.sh`.
 
+Quick verify:
+
+```bash
+git config --get core.hooksPath   # expect: .githooks
+test -x .githooks/pre-commit
+```
+
 ### Strategy B: per-language wrappers
 
 Wrappers in `scripts/hooks/` format the staged set, stage changes, then run strict gates.
