@@ -34,6 +34,20 @@ if [[ "${#files[@]}" -eq 0 ]]; then
   exit 0
 fi
 
+prek_cmd=(prek run)
+for f in "${files[@]}"; do
+  case "${f}" in
+    prek.toml|*/prek.toml|\
+    .pre-commit-config.yaml|*/.pre-commit-config.yaml|\
+    .pre-commit-config.yml|*/.pre-commit-config.yml|\
+    .prekignore|*/.prekignore)
+      # Workspace discovery is cached; refresh when configuration/ignore files change.
+      prek_cmd=(prek --refresh run)
+      break
+      ;;
+  esac
+done
+
 git_dir="$(git rev-parse --git-dir)"
 lock_dir="${git_dir}/.prek-autostage.lockdir"
 
@@ -80,7 +94,7 @@ acquire_lock
 
 for round in $(seq 1 "${MAX_ROUNDS}"); do
   set +e
-  prek run
+  "${prek_cmd[@]}"
   status=$?
   set -e
 
