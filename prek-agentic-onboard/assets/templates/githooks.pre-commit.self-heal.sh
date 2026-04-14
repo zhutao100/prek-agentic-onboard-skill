@@ -93,6 +93,7 @@ unstaged_changes_in_staged_set() {
 acquire_lock
 
 for round in $(seq 1 "${MAX_ROUNDS}"); do
+  : "${round}"
   set +e
   "${prek_cmd[@]}"
   status=$?
