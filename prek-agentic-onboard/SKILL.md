@@ -73,6 +73,7 @@ This will back up `.git/hooks/`, run `pre-commit uninstall` if present, then ins
 Then (recommended):
 
 - Review the existing `.pre-commit-config.yaml` and ensure **all major languages** in the repo have appropriate hooks (format + checks).
+  - Shell repos: add `shfmt` + `shellcheck` (use `shellcheck -x` when scripts `source` shared libraries to avoid `SC1091`).
 - If the repo is polyglot, switch to **workspace mode** (thin root + per-subproject configs) and verify:
   - scaffold missing subproject configs: `bash prek-agentic-onboard/scripts/scaffold_workspace_mode.sh --repo <path-to-repo>`
   - confirm discovery: `prek --refresh list`
