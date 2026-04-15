@@ -95,6 +95,57 @@ install_baseline_config_if_missing() {
   echo "Created .pre-commit-config.yaml ($config baseline)." >&2
 }
 
+hash_stream() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 | awk '{print $1}'
+    return 0
+  fi
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum | awk '{print $1}'
+    return 0
+  fi
+  if command -v openssl >/dev/null 2>&1; then
+    openssl dgst -sha256 | awk '{print $2}'
+    return 0
+  fi
+  wc -c | awk '{print $1}'
+}
+
+git_diff_fingerprint() {
+  {
+    git diff --no-ext-diff
+    git diff --cached --no-ext-diff
+  } | hash_stream
+}
+
+prek_run_all_files_converge() {
+  local max_rounds="${PREK_AUTOFIX_MAX_ROUNDS:-5}"
+  local round
+  local before after status
+
+  for round in $(seq 1 "${max_rounds}"); do
+    before="$(git_diff_fingerprint)"
+    set +e
+    prek run --all-files --show-diff-on-failure
+    status=$?
+    set -e
+
+    if [[ "${status}" -eq 0 ]]; then
+      return 0
+    fi
+
+    after="$(git_diff_fingerprint)"
+    if [[ "${before}" == "${after}" ]]; then
+      return "${status}"
+    fi
+
+    echo "note: prek modified files; retrying for convergence (${round}/${max_rounds})..." >&2
+  done
+
+  echo "error: prek did not converge after ${max_rounds} rounds (possible formatter ping-pong)" >&2
+  return 1
+}
+
 ensure_prek
 
 install_baseline_config_if_missing
@@ -121,8 +172,8 @@ else
 fi
 
 if [[ "$run_all" == "true" ]]; then
-  echo "Running prek across all files (may be slow on first run)..." >&2
-  prek run --all-files --show-diff-on-failure
+  echo "Running prek across all files (auto-converge on fixable changes)..." >&2
+  prek_run_all_files_converge
 fi
 
 maybe_prompt_workspace_mode() {

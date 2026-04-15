@@ -32,6 +32,57 @@ if [[ "${#config_files[@]}" -eq 0 ]]; then
   exit 2
 fi
 
+hash_stream() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 | awk '{print $1}'
+    return 0
+  fi
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum | awk '{print $1}'
+    return 0
+  fi
+  if command -v openssl >/dev/null 2>&1; then
+    openssl dgst -sha256 | awk '{print $2}'
+    return 0
+  fi
+  wc -c | awk '{print $1}'
+}
+
+git_diff_fingerprint() {
+  {
+    git diff --no-ext-diff
+    git diff --cached --no-ext-diff
+  } | hash_stream
+}
+
+prek_run_all_files_converge() {
+  local max_rounds="${PREK_AUTOFIX_MAX_ROUNDS:-5}"
+  local round
+  local before after status
+
+  for round in $(seq 1 "${max_rounds}"); do
+    before="$(git_diff_fingerprint)"
+    set +e
+    prek run --all-files --show-diff-on-failure
+    status=$?
+    set -e
+
+    if [[ "${status}" -eq 0 ]]; then
+      return 0
+    fi
+
+    after="$(git_diff_fingerprint)"
+    if [[ "${before}" == "${after}" ]]; then
+      return "${status}"
+    fi
+
+    echo "note: prek modified files; retrying for convergence (${round}/${max_rounds})..." >&2
+  done
+
+  echo "error: prek did not converge after ${max_rounds} rounds (possible formatter ping-pong)" >&2
+  return 1
+}
+
 ts="$(date +%Y%m%d-%H%M%S)"
 git_dir="$(git rev-parse --git-dir)"
 hooks_dir="$(git rev-parse --git-path hooks)"
@@ -65,8 +116,8 @@ else
   prek install -f --prepare-hooks
 fi
 
-echo "Smoke test: prek run --all-files" >&2
-prek run --all-files --show-diff-on-failure
+echo "Smoke test: prek run --all-files (auto-converge on fixable changes)" >&2
+prek_run_all_files_converge
 
 cat >&2 <<EOF
 Migration complete.
